@@ -15,15 +15,30 @@ build_audit_trail <- function(audit_log, scores, grade) {
   outlier_summary <- if (!is.null(audit_log$outliers))
     if (is.list(audit_log$outliers))
       paste(unlist(audit_log$outliers), collapse = " | ")
-  else
-    audit_log$outliers
+  else audit_log$outliers
   else "No outlier handling performed"
   
+  schema_summary <- if (!is.null(audit_log$schema))
+    if (is.list(audit_log$schema))
+      paste(unlist(audit_log$schema), collapse = " | ")
+  else audit_log$schema
+  else "No schema issues"
+  
+  format_summary <- if (!is.null(audit_log$formats))
+    if (is.list(audit_log$formats))
+      paste(unlist(audit_log$formats), collapse = " | ")
+  else audit_log$formats
+  else "No format issues"
+  
   trail <- data.frame(
-    Stage = c("Structural Normalization", "Imputation",
-              "Outlier Handling", "Deduplication", "Standardization"),
+    Stage = c("Structural Normalization", "Schema Validation",
+              "Format (Regex) Checks",   "Imputation",
+              "Outlier Handling",         "Deduplication",
+              "Standardization"),
     Summary = c(
       "Column names cleaned, types auto-detected",
+      schema_summary,
+      format_summary,
       imp_summary,
       outlier_summary,
       dedup_summary,
@@ -39,9 +54,12 @@ build_audit_trail <- function(audit_log, scores, grade) {
   )
   
   list(
-    audit_trail     = trail,
-    column_scores   = col_score_df,
-    readiness_grade = scores$readiness_grade,
-    composite_score = scores$composite_score
+    audit_trail      = trail,
+    column_scores    = col_score_df,
+    readiness_grade  = scores$readiness_grade,
+    composite_score  = scores$composite_score,
+    status           = scores$status,
+    status_color     = scores$status_color,
+    component_scores = scores$component_scores
   )
 }
